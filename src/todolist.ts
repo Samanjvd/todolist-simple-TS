@@ -10,6 +10,8 @@ interface Todo {
   isComplite: boolean;
 }
 
+const todos: Todo[] = JSON.parse(localStorage.getItem("todos") || "[]");
+
 const handleSubmit = (e: Event) => {
   e.preventDefault();
 
@@ -20,6 +22,9 @@ const handleSubmit = (e: Event) => {
   };
 
   addTodoToDom(newTodo);
+  todos.push(newTodo);
+  saveTodosToLocalStorage();
+
   toDoInput.value = "";
   toDoInput.focus();
 };
@@ -35,4 +40,13 @@ const addTodoToDom = (todo: Todo) => {
   );
 };
 
+const saveTodosToLocalStorage = () => {
+  localStorage.setItem("todos", JSON.stringify(todos));
+  return true;
+};
+
 addTodo.addEventListener("click", (e) => handleSubmit(e));
+
+window.addEventListener("DOMContentLoaded", () =>
+  todos.forEach((todo) => addTodoToDom(todo))
+);
