@@ -1,24 +1,25 @@
 const toDoInput = document.querySelector(".todo-value") as HTMLInputElement;
 const addTodo = document.querySelector(".add-todo") as HTMLButtonElement;
 const clearTodos = document.querySelector(".clear-todos") as HTMLButtonElement;
-const deleteIcon = document.querySelector(".deleteIcon") as HTMLButtonElement;
 const todoList = document.querySelector(".todoList") as HTMLUListElement;
 
 interface Todo {
   id: string;
   title: string;
-  isComplite: boolean;
+  isComplete: boolean;
 }
 
-const todos: Todo[] = JSON.parse(localStorage.getItem("todos") || "[]");
+let todos: Todo[] = JSON.parse(localStorage.getItem("todos") || "[]");
 
 const handleSubmit = (e: Event) => {
   e.preventDefault();
 
+  if (!toDoInput.value.trim()) return;
+
   const newTodo: Todo = {
     id: crypto.randomUUID(),
     title: toDoInput.value,
-    isComplite: false,
+    isComplete: false,
   };
 
   addTodoToDom(newTodo);
@@ -32,11 +33,12 @@ const handleSubmit = (e: Event) => {
 const addTodoToDom = (todo: Todo) => {
   todoList.insertAdjacentHTML(
     "beforeend",
-    `<li>
-          ${todo.title}<span class="icon deleteIcon" 
-            ><i class="fas fa-trash"></i
-          ></span>
-        </li>`
+    `<li onclick="removeTodo('${todo.id}')">
+        ${todo.title}
+        <span class="icon deleteIcon">
+          <i class="fas fa-trash"></i>
+        </span>
+     </li>`
   );
 };
 
@@ -45,8 +47,25 @@ const saveTodosToLocalStorage = () => {
   return true;
 };
 
+function removeTodo(todoID: string) {
+  todos = todos.filter((todo) => todo.id !== todoID);
+  saveTodosToLocalStorage();
+
+  todoList.innerHTML = "";
+  todos.forEach((todo) => addTodoToDom(todo));
+}
+
+// @ts-ignore
+window.removeTodo = removeTodo;
+
 addTodo.addEventListener("click", (e) => handleSubmit(e));
 
 window.addEventListener("DOMContentLoaded", () =>
   todos.forEach((todo) => addTodoToDom(todo))
 );
+
+clearTodos.addEventListener("click", () => {
+  todos = [];
+  saveTodosToLocalStorage();
+  todoList.innerHTML = "";
+});
